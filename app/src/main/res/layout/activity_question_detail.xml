@@ -25,4 +25,13 @@
         android:layout_margin="16dp"
         android:src="@drawable/plus" />
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/favoriteButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/listView"
+        android:background="@drawable/custom_button"
+        android:text="お気に入り"
+        android:textColor="@color/colorButtonText" />
+
 </RelativeLayout>

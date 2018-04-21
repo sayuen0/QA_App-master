@@ -14,6 +14,11 @@ public class Question implements Serializable {
     private byte[] mBitmapArray;
     private ArrayList<Answer> mAnswerArrayList;
 
+
+
+
+
+
     public String getTitle() {
         return mTitle;
     }
@@ -33,6 +38,7 @@ public class Question implements Serializable {
     public String getQuestionUid() {
         return mQuestionUid;
     }
+
     public int getGenre() {
         return mGenre;
     }
@@ -45,7 +51,16 @@ public class Question implements Serializable {
         return mAnswerArrayList;
     }
 
-    public Question(String title, String body, String name, String uid, String questionUid, int genre, byte[] bytes, ArrayList<Answer> answers) {
+    public boolean getIsFavored(){
+        return false;
+    }
+
+
+    //コンストラクタ、isFavoredの初期値はfalse
+
+
+    public Question(String title, String body, String name, String uid, String questionUid,
+                    int genre, byte[] bytes, ArrayList<Answer> answers) {
         mTitle = title;
         mBody = body;
         mName = name;

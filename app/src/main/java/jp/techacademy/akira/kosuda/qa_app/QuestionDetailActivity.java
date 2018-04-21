@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,7 +25,20 @@ public class QuestionDetailActivity extends AppCompatActivity {
     private Question mQuestion;
     private QuestionDetailListAdapter mAdapter;
 
+    //質問の
+
+
     private DatabaseReference mAnswerRef;
+    // todo お気に入りボタンがタップされているときに、見た目の変更
+    
+    FloatingActionButton favoriteButton;
+
+    //ボタンの押されている・いないの識別
+    boolean isFavoriteButtonOn = false;
+
+
+
+
 
     private ChildEventListener mEventListener = new ChildEventListener() {
         @Override
@@ -42,6 +57,8 @@ public class QuestionDetailActivity extends AppCompatActivity {
             String body = (String) map.get("body");
             String name = (String) map.get("name");
             String uid = (String) map.get("uid");
+            String favorite = (String) map.get("favorite");
+            
 
             Answer answer = new Answer(body, name, uid, answerUid);
             mQuestion.getAnswers().add(answer);
@@ -80,6 +97,51 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
         setTitle(mQuestion.getTitle());
 
+
+
+        final DatabaseReference  questionRef = FirebaseDatabase.getInstance().getReference();
+
+        favoriteButton = (FloatingActionButton) findViewById(R.id.favoriteButton);
+
+        favoriteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isFavoriteButtonOn){
+                    isFavoriteButtonOn   = true;
+                    favoriteButton.setImageResource(android.R.drawable.btn_star_big_on);
+                    questionRef.child(Const.FavoritesPATH).child(mQuestion.getUid()).child()
+                    /* TODO: 2018/04/20 favoriteのデータを参照
+                    /contents
+                    /users
+                    /favorites
+                        /user_id1
+                            /question_id1
+                            /question_id2
+                        /user_id2
+                            /question_id1
+                            /question_id3
+                     このような階層構造を作る*/
+
+                    
+                }else {
+                    isFavoriteButtonOn = false;
+                    favoriteButton.setImageResource(android.R.drawable.btn_star_big_off);
+                }
+                
+            }
+        });
+
+        //ログイン済みユーザーがいなかったらボタンを隠す
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user ==null){
+            favoriteButton.setVisibility(View.GONE);
+        }else {
+            favoriteButton.setVisibility(View.VISIBLE);
+        }
+
+
+        
+
         // ListViewの準備
         mListView = (ListView) findViewById(R.id.listView);
         mAdapter = new QuestionDetailListAdapter(this, mQuestion);
@@ -113,4 +175,6 @@ public class QuestionDetailActivity extends AppCompatActivity {
         mAnswerRef.addChildEventListener(mEventListener);
 
     }
+    
+   
 }

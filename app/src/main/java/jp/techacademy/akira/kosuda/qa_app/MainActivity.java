@@ -14,6 +14,7 @@ import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,6 +27,11 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+//todo ログインしている場合に「お気に入り」が既にタップされているかどうかをボタンの見た目で判断できるようにしてください
+//todo 「お気に入り」質問の一覧画面を作成してください
+//todo ログインしている場合にドロワーメニューに「お気に入り」一覧画面へ遷移するリンクを追加してください
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -160,6 +166,11 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(MenuItem item) {
                 int id = item.getItemId();
 
+                if(id==R.id.nav_favorite){
+                    mToolbar.setTitle("お気に入り");
+
+                    // TODO: 2018/04/21 ジャンルは指定せずに、お気に入りの質問のみの画面に遷移
+                }
                 if (id == R.id.nav_hobby) {
                     mToolbar.setTitle("趣味");
                     mGenre = 1;
@@ -201,6 +212,16 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new QuestionsListAdapter(this);
         mQuestionArrayList = new ArrayList<Question>();
         mAdapter.notifyDataSetChanged();
+
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Questionのインスタンスを渡して質問詳細画面を起動する
+                Intent intent = new Intent(getApplicationContext(), QuestionDetailActivity.class);
+                intent.putExtra("question", mQuestionArrayList.get(position));
+                startActivity(intent);
+            }
+        });
         // --- ここまで追加する ---
     }
 
