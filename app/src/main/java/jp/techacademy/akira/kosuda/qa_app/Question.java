@@ -51,10 +51,6 @@ public class Question implements Serializable {
         return mAnswerArrayList;
     }
 
-    public boolean getIsFavored(){
-        return false;
-    }
-
 
     //コンストラクタ、isFavoredの初期値はfalse
 
@@ -69,5 +65,6 @@ public class Question implements Serializable {
         mGenre = genre;
         mBitmapArray = bytes.clone();
         mAnswerArrayList = answers;
+
     }
 }

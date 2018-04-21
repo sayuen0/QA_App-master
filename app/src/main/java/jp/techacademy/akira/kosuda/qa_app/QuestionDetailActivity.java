@@ -18,6 +18,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class QuestionDetailActivity extends AppCompatActivity {
 
@@ -25,7 +26,11 @@ public class QuestionDetailActivity extends AppCompatActivity {
     private Question mQuestion;
     private QuestionDetailListAdapter mAdapter;
 
-    //質問の
+    private  DatabaseReference favoriteRef;
+
+     DatabaseReference  databaseReference;
+
+
 
 
     private DatabaseReference mAnswerRef;
@@ -57,7 +62,6 @@ public class QuestionDetailActivity extends AppCompatActivity {
             String body = (String) map.get("body");
             String name = (String) map.get("name");
             String uid = (String) map.get("uid");
-            String favorite = (String) map.get("favorite");
             
 
             Answer answer = new Answer(body, name, uid, answerUid);
@@ -86,10 +90,46 @@ public class QuestionDetailActivity extends AppCompatActivity {
         }
     };
 
+
+    private ChildEventListener mFavoriteListener = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+            isFavoriteButtonOn = true;
+            favoriteButton.setImageResource(android.R.drawable.btn_star_big_on);
+
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_question_detail);
+
+        favoriteButton = (FloatingActionButton) findViewById(R.id.favoriteButton);
+        //ログイン済みユーザーがいなかったらボタンを隠す
+
 
         // 渡ってきたQuestionのオブジェクトを保持する
         Bundle extras = getIntent().getExtras();
@@ -97,11 +137,10 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
         setTitle(mQuestion.getTitle());
 
+       databaseReference = FirebaseDatabase.getInstance().getReference();
 
 
-        final DatabaseReference  questionRef = FirebaseDatabase.getInstance().getReference();
 
-        favoriteButton = (FloatingActionButton) findViewById(R.id.favoriteButton);
 
         favoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -109,35 +148,25 @@ public class QuestionDetailActivity extends AppCompatActivity {
                 if(!isFavoriteButtonOn){
                     isFavoriteButtonOn   = true;
                     favoriteButton.setImageResource(android.R.drawable.btn_star_big_on);
-                    questionRef.child(Const.FavoritesPATH).child(mQuestion.getUid()).child()
-                    /* TODO: 2018/04/20 favoriteのデータを参照
-                    /contents
-                    /users
-                    /favorites
-                        /user_id1
-                            /question_id1
-                            /question_id2
-                        /user_id2
-                            /question_id1
-                            /question_id3
-                     このような階層構造を作る*/
+                    Map<String, Long> data = new HashMap<String, Long>();
+
+                    // Genre
+                    data.put("genre", (long)mQuestion.getGenre());
+                    favoriteRef.setValue(data);
+
 
                     
                 }else {
                     isFavoriteButtonOn = false;
                     favoriteButton.setImageResource(android.R.drawable.btn_star_big_off);
+                    favoriteRef.removeValue();
                 }
                 
             }
         });
 
-        //ログイン済みユーザーがいなかったらボタンを隠す
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user ==null){
-            favoriteButton.setVisibility(View.GONE);
-        }else {
-            favoriteButton.setVisibility(View.VISIBLE);
-        }
+
+
 
 
         
@@ -174,6 +203,20 @@ public class QuestionDetailActivity extends AppCompatActivity {
         mAnswerRef = dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
         mAnswerRef.addChildEventListener(mEventListener);
 
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user ==null){
+            favoriteButton.setVisibility(View.GONE);
+        }else {
+            favoriteRef = databaseReference.child(Const.FavoritesPATH).child(user.getUid()).child(mQuestion.getQuestionUid());
+            favoriteRef.addChildEventListener(mFavoriteListener);
+            favoriteButton.setVisibility(View.VISIBLE);
+        }
     }
     
    
